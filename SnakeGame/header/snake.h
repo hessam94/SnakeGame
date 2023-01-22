@@ -14,6 +14,12 @@ class Snake {
         head_x(grid_width / 2),
         head_y(grid_height / 2) {}
 
+  Snake (int grid_width, int grid_height , float head_x , float head_y)
+      : grid_width(grid_width),
+      grid_height(grid_height),
+      head_x(head_x),
+      head_y(head_y) {}
+
   void Update();
 
   void GrowBody();
