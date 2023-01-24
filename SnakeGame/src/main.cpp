@@ -5,7 +5,7 @@
 #include "game.h"
 #include "renderer.h"
 
-
+using namespace std;
 int main(int argc, char* args[]) 
 {
   constexpr std::size_t kFramesPerSecond{60};
@@ -18,7 +18,14 @@ int main(int argc, char* args[])
   Renderer renderer(kScreenWidth, kScreenHeight, kGridWidth, kGridHeight);
   Controller controller;
   Game game(kGridWidth, kGridHeight, 3);
+  game.is_player_turn = true;
+  game.running = true;
+  thread t(&Game::UpdateEnemies, &game);
   game.Run(controller, renderer, kMsPerFrame);
+  // to make sure the second thread comes out  of wait and terminates
+  game.is_player_turn = false;
+  game.cv.notify_all();
+  t.join();
   std::cout << "Game has terminated successfully!\n";
   std::cout << "Score: " << game.GetScore() << "\n";
   std::cout << "Size: " << game.GetSize() << "\n";

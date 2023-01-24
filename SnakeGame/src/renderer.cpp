@@ -51,7 +51,8 @@ void Renderer::Render(Snake const snake) {
     block.h = screen_height / grid_height;
 
     // Render snake's body
-    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    auto r = snake.color.r, g = snake.color.g, b = snake.color.b, a = snake.color.a;
+    SDL_SetRenderDrawColor(sdl_renderer, r,g,b,a);
     for (SDL_Point const& point : snake.body) {
         block.x = point.x * block.w;
         block.y = point.y * block.h;
@@ -62,7 +63,7 @@ void Renderer::Render(Snake const snake) {
   block.x = static_cast<int>(snake.head_x) * block.w;
   block.y = static_cast<int>(snake.head_y) * block.h;
   if (snake.alive) {
-    SDL_SetRenderDrawColor(sdl_renderer, 0x00, 0x7A, 0xCC, 0xFF);
+      SDL_SetRenderDrawColor(sdl_renderer, g, b, b, a);
   } else {
     SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
   }

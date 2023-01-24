@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "SDL.h"
+#include "Color.h"
 
 class Snake {
  public:
@@ -12,13 +13,18 @@ class Snake {
       : grid_width(grid_width),
         grid_height(grid_height),
         head_x(grid_width / 2),
-        head_y(grid_height / 2) {}
+        head_y(grid_height / 2),
+        color(Color::blue()),
+        size(1)
+        {}
 
-  Snake (int grid_width, int grid_height , float head_x , float head_y)
+  Snake (int grid_width, int grid_height , float head_x , float head_y,Color  color, int size)
       : grid_width(grid_width),
       grid_height(grid_height),
       head_x(head_x),
-      head_y(head_y) {}
+      head_y(head_y),
+      color(color),
+      size(size){}
 
   void Update();
 
@@ -28,11 +34,13 @@ class Snake {
   Direction direction = Direction::kUp;
 
   float speed{0.1f};
-  int size{1};
+  int size;
   bool alive{true};
   float head_x;
   float head_y;
   std::vector<SDL_Point> body;
+  Color color;
+  bool isPlayer{true};
 
  private:
   void UpdateHead();
@@ -41,6 +49,7 @@ class Snake {
   bool growing{false};
   int grid_width;
   int grid_height;
+ 
 };
 
 #endif

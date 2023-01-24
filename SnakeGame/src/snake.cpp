@@ -56,10 +56,17 @@ void Snake::UpdateBody(SDL_Point &current_head_cell, SDL_Point &prev_head_cell) 
   }
 
   // Check if the snake has died.
-  for (auto const &item : body) {
-    if (current_head_cell.x == item.x && current_head_cell.y == item.y) {
-      alive = false;
-    }
+  //if (isPlayer)
+  {
+      for (auto const& item : body) {
+          if (current_head_cell.x == item.x && current_head_cell.y == item.y) {
+              alive = false;
+          }
+      }
+  }
+  //else
+  {
+      
   }
 }
 
