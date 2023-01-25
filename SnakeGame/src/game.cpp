@@ -7,7 +7,7 @@
 using namespace std;
 using namespace std;
 Game::Game(std::size_t grid_width, std::size_t grid_height, int enemies_count)
-	: snake_player(grid_width, grid_height),
+	:snake_player (grid_width, grid_height),
 	engine(dev()),
 	random_w(0, static_cast<int>(grid_width - 1)),
 	random_h(0, static_cast<int>(grid_height - 1))
@@ -23,7 +23,7 @@ void Game::Run(Controller const& controller, Renderer& renderer, std::size_t tar
 	Uint32 frame_duration;
 	int frame_count = 0;
 	auto begin = std::chrono::high_resolution_clock::now();
-	while (running)
+	while (running && snake_player.alive)
 	{
 		RefreshScreen(controller, renderer, target_frame_duration, title_timestamp, frame_start, frame_end,
 			frame_duration, frame_count, running);
@@ -57,6 +57,16 @@ void Game::RefreshScreen(Controller const& controller, Renderer& renderer, std::
 		renderer.Render(sn);
 	renderer.RenderFood(food);
 	renderer.Render(snake_player);
+
+	if (CheckMainPlayerIsHitted() == true && scoreDeducted == false)
+	{
+		score--;
+		scoreDeducted = true;
+		if (score < 0)
+			snake_player.alive = false;
+	}
+
+
 	renderer.UpdateScreen();
 
 	frame_end = SDL_GetTicks();
@@ -98,7 +108,10 @@ void Game::PlaceFood() {
 }
 
 void Game::Update() {
-	if (!snake_player.alive) return;
+	if (!snake_player.alive)
+	{
+		return;
+	}
 
 	RunEnemies();
 	snake_player.Update();
@@ -119,6 +132,28 @@ void Game::Update() {
 int Game::GetScore() const { return score; }
 int Game::GetSize() const { return snake_player.size; }
 
+bool Game::CheckMainPlayerIsHitted()
+{
+	
+	for (auto& en : snake_enemies)
+	{
+		SDL_Point head = { en.head_x  , en.head_y };
+		for (auto& cell : snake_player.body)
+			if (Points_Are_Equal(cell, head))
+				 return true;
+	}
+	scoreDeducted = false;
+	return false;
+}
+
+bool Game::Points_Are_Equal(SDL_Point& p1, SDL_Point& p2)
+{
+	if (p1.x == p2.x && p1.y == p2.y)
+		return true;
+	return false;
+
+}
+
 void Game::RunEnemies()
 {
 	for (auto& sn : snake_enemies)
@@ -128,7 +163,6 @@ void Game::RunEnemies()
 
 void Game::CreateEnemies(int count, std::size_t grid_width, std::size_t grid_height)
 {
-	//snake_enemies.resize(count);
 	for (int i = 0; i < count; i++)
 	{
 		int x = random_w(engine);
@@ -139,6 +173,7 @@ void Game::CreateEnemies(int count, std::size_t grid_width, std::size_t grid_hei
 		else
 			en.direction = Snake::Direction::kRight;
 
+		// create each cell of enemy's bedy and add to bedy vector
 		for (int sz = 0; sz < en.size; sz++)
 		{
 			switch (en.direction) {

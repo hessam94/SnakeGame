@@ -4,6 +4,7 @@
 #include <vector>
 #include "SDL.h"
 #include "Color.h"
+//#include <game.h>
 
 class Snake {
  public:
@@ -41,6 +42,7 @@ class Snake {
   std::vector<SDL_Point> body;
   Color color;
   bool isPlayer{true};
+  //void SetGame(Game* game);
 
  private:
   void UpdateHead();
@@ -49,6 +51,7 @@ class Snake {
   bool growing{false};
   int grid_width;
   int grid_height;
+  //Game* game;
  
 };
 

@@ -12,6 +12,7 @@ using namespace std;
 class Game {
 public:
 	Game(std::size_t grid_width, std::size_t grid_height, int enemies_count);
+	
 	void Run(Controller const& controller, Renderer& renderer,
 		std::size_t target_frame_duration);
 	int GetScore() const;
@@ -21,6 +22,7 @@ public:
 	condition_variable cv;
 	mutex mutex_player;
 	bool running;
+	bool CheckMainPlayerIsHitted();
 private:
 	Snake snake_player;
 	SDL_Point food;
@@ -33,7 +35,7 @@ private:
 
 	int score{ 0 };
 
-
+	bool scoreDeducted = false;
 	void PlaceFood();
 	void Update();
 	void CreateEnemies(int count, std::size_t grid_width, std::size_t grid_height);
@@ -41,6 +43,8 @@ private:
 	void RefreshScreen(Controller const& controller, Renderer& renderer, std::size_t& target_frame_duration,
 		Uint32& title_timestamp, Uint32& frame_start, Uint32& frame_end, Uint32& frame_duration, int& frame_count, bool& running);
 	bool isDirectionParallel(Snake::Direction d1, Snake::Direction d2);
+	bool Points_Are_Equal(SDL_Point& p1, SDL_Point& p2);
+
 	
 };
 
