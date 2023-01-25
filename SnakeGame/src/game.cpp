@@ -27,6 +27,12 @@ void Game::Run(Controller const& controller, Renderer& renderer, std::size_t tar
 	{
 		RefreshScreen(controller, renderer, target_frame_duration, title_timestamp, frame_start, frame_end,
 			frame_duration, frame_count, running);
+
+		// finding the difference time of two consecutive cycle, if it is 4 seconds then we should stop, go to next thread to update the enemies direction, then back here
+		// the switch between two threads is presicely tested, there is no race neither a mutual exclusion
+		// first we lock a shared mutex, the player turn initialzed as true in the beggining of the program
+		// so even if the update enemies function called entered first (it is running by another thread), it will wait by conditional variable condition.
+		// as soon as we enter to this IF scope, player turn will change to protect any fact race from current thread again, notify the sleeping thread on the other side and goes into wait until the next round
 		auto end = std::chrono::high_resolution_clock::now();
 		auto diff = chrono::duration_cast<chrono::seconds>(end - begin);
 		if (diff.count() >= 4)
@@ -58,6 +64,7 @@ void Game::RefreshScreen(Controller const& controller, Renderer& renderer, std::
 	renderer.RenderFood(food);
 	renderer.Render(snake_player);
 
+	// if score is already deducted and has not reseted yet, dont decrease the score again. 
 	if (CheckMainPlayerIsHitted() == true && scoreDeducted == false)
 	{
 		score--;
@@ -109,10 +116,8 @@ void Game::PlaceFood() {
 
 void Game::Update() {
 	if (!snake_player.alive)
-	{
 		return;
-	}
-
+	
 	RunEnemies();
 	snake_player.Update();
 
@@ -134,7 +139,9 @@ int Game::GetSize() const { return snake_player.size; }
 
 bool Game::CheckMainPlayerIsHitted()
 {
-	
+	// we check if the enemy's head hit the player body. as soon as it happens we return true, only one collision is enough to return,
+	// we do not decrease few point for one collision, this happens because the objects are moving and the head of enemy may hit few parts of player
+	// so only one hit is counted 
 	for (auto& en : snake_enemies)
 	{
 		SDL_Point head = { en.head_x  , en.head_y };
@@ -142,6 +149,7 @@ bool Game::CheckMainPlayerIsHitted()
 			if (Points_Are_Equal(cell, head))
 				 return true;
 	}
+	// if all of the enemies checked and there is no collision anymore, then we reset the scoreDeducted, means if any collision happens again we will decrease a point
 	scoreDeducted = false;
 	return false;
 }
@@ -207,6 +215,8 @@ void Game::CreateEnemies(int count, std::size_t grid_width, std::size_t grid_hei
 
 void Game::UpdateEnemies()
 {
+	// based on the direction of each enemy and player direction, we update the enemy direction. 
+	// to make it hard, enemy will turn towards the player to hit the player
 	while (running)
 	{
 		unique_lock<mutex> lock(mutex_player);
@@ -216,7 +226,7 @@ void Game::UpdateEnemies()
 		auto player_direction = snake_player.direction;
 		for (auto& en : snake_enemies)
 		{
-			if (isDirectionParallel(en.direction, player_direction) == false) continue; // not paralle, they are colliding 
+			if (isDirectionParallel(en.direction, player_direction) == false) continue; // not parallel, they are colliding 
 			if (player_direction == Snake::Direction::kDown || player_direction == Snake::Direction::kUp)
 			{
 				if (snake_player.head_x < en.head_x) en.direction = Snake::Direction::kLeft;
@@ -229,6 +239,7 @@ void Game::UpdateEnemies()
 			}
 		}
 
+		// when the algorithm is done, we swithc the turn, to snake player. and notify the waited player. need to run enemies to render new direction of enemies. 
 		is_player_turn = true;
 		RunEnemies();
 		cv.notify_all();

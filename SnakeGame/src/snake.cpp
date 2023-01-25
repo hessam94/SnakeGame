@@ -77,8 +77,3 @@ bool Snake::SnakeCell(int x, int y) {
   }
   return false;
 }
-
-//void Snake::SetGame(Game* g)
-//{
-//   // game = g;
-//}
