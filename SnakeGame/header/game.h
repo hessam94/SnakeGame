@@ -34,7 +34,6 @@ private:
 	std::uniform_int_distribution<int> random_h;
 
 	int score{ 0 };
-
 	bool scoreDeducted = false;
 	void PlaceFood();
 	void Update();
