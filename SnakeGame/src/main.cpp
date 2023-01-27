@@ -37,5 +37,7 @@ int main(int argc, char* args[])
   std::cout << "Game has terminated successfully!\n";
   std::cout << "Score: " << game->GetScore() << "\n";
   std::cout << "Size: " << game->GetSize() << "\n";
+  std::cout << "Please push any button to terminate the game\n";
+  getchar();
   return 0;
 }
